@@ -1,66 +1,85 @@
-# OrangeFox R12.0 for Galaxy Tab A7 10.4 LTE (SM-T505, gta4l)
+# OrangeFox Recovery — Galaxy Tab A7 10.4 (SM-T505)
 
-Device tree and source patches for an OrangeFox build that works with Android 11 ROMs
-(LineageOS 18.1, PixelExperience 11) on the Android 12 (A12, anti-rollback) firmware.
+**[Русский](#русский) · [English](#english)** · Прошивки / ROMs: [gta4l-gta4lwifi-roms](https://github.com/dolbaras/gta4l-gta4lwifi-roms)
 
-## Changes against OrangeFox R11.3 for gta4l
+---
 
-- **/data labels after a recovery visit** (the reason for this build). The recovery's
-  vold prepared the per-user directories with Android 12 labels (per-user MLS categories on `/data/user_de/<id>`,
-  `user_profile_root_file` on `/data/misc/profiles/cur/<id>`). An Android 11 ROM then
-  lost access to them: Bluetooth stopped working and ART profiles broke. The recovery now
-  only installs the keys and leaves the storage to the installed system
-  (`patches/system_vold.patch`).
+## Русский
 
-Fixes in this tree, needed for the newer OrangeFox source and to keep the device tree
-consistent with the hardware:
+OrangeFox R12.0 для Galaxy Tab A7 10.4 LTE (**SM-T505, gta4l**) на прошивке Android 12 (A12, anti-rollback). Рассчитан на установку и обслуживание прошивок на Android 11: [LineageOS 18.1 и PixelExperience Plus](https://github.com/dolbaras/gta4l-gta4lwifi-roms).
 
-- **`adb reboot` returned to recovery.** On a debuggable recovery adbd ran
-  `/system/bin/reboot`, which reports the reason `shell`; the Samsung bootloader keeps
-  booting recovery after a reboot from recovery with a reason it does not know. adbd now
-  reboots through init with the requested target (`patches/packages_modules_adb.patch`).
-- **5 s delay on every touch.** Haptics waited for an AIDL vibrator service that does not
-  exist in recovery; the tablet has no vibration motor (`TW_NO_HAPTICS`).
-- **Decryption.** The framework VINTF manifest is installed into the ramdisk: without it
-  libvintf ignores the manifest fragments, keystore2 is not declared and aborts. The
-  libraries the vendor blobs need are included (HIDL memory for the QSEECom HAL, display
-  config, libnetutils).
-- Samsung health HAL blobs removed: they need the vendor VNDK `libutils` and never loaded;
-  battery status comes from the default implementation.
-- Boot image header (os_version 99.87.36, patch level 2099-12) matches R11.3, so keymaster
-  accepts the same keys. lptools and lpdump are included.
+### Скачать
+Вкладка **[Releases](../../releases)**: образ, архив для Odin, zip для установки из рекавери, md5. История изменений — [CHANGELOG.md](CHANGELOG.md).
 
-## Build
+### Чем отличается от OrangeFox R11.3
+- **Не ломает Android 11 после захода в рекавери.** R11.3 переразмечала каталоги пользователя в `/data` по правилам Android 12, после чего в Android 11 переставали работать Bluetooth и профили ART. Теперь рекавери только подключает ключи шифрования, а каталоги оставляет установленной системе.
+- `adb reboot` из рекавери загружает систему, а не снова рекавери.
+- Нет задержки на касания: виброотклик выключен, вибромотора у планшета нет.
+- Расшифровка `/data` работает с ключами прошивки A12.
 
-OrangeFox `fox_12.1` manifest (bootable/recovery cbcc4f71, vendor/recovery cea00ca).
+### Установка
+- **Из рекавери:** установить `OrangeFox-*.zip` или записать образ в раздел Recovery.
+- **Из режима Download:** `OrangeFox-*.img.tar` в слот AP программы Odin или `heimdall flash --RECOVERY recovery.img` (heimdall 2.x).
 
-```
+Перезагрузка в систему: меню **Перезагрузка → Система** или `adb reboot`.
+
+### Известные проблемы
+- `adb shell reboot` (команда внутри оболочки) возвращает в рекавери: так загрузчик Samsung реагирует на причину перезагрузки `shell`. Используйте меню или `adb reboot`.
+- USB и adb появляются примерно через 25 секунд после старта: столько занимают расшифровка и стартовые скрипты OrangeFox.
+- SM-T500 (gta4lwifi) не проверялся.
+
+### Сборка
+Манифест OrangeFox `fox_12.1` (bootable/recovery `cbcc4f71`, vendor/recovery `cea00ca`):
+```bash
 cp -r device_samsung_gta4l <fox>/device/samsung/gta4l
 git -C <fox>/system/vold apply patches/system_vold.patch
 git -C <fox>/packages/modules/adb apply patches/packages_modules_adb.patch
 cd <fox> && source build/envsetup.sh && lunch twrp_gta4l-eng && mka recoveryimage
 ```
 
-## Install
+### Отзывы
+[Issues](../../issues): модель, версия стоковой прошивки, что не работает, лог из `/sdcard/Fox/logs`.
 
-- From a working recovery: flash `OrangeFox-*.zip`, or flash the image to the Recovery
-  partition.
-- From Download mode: `OrangeFox-*.img.tar` in the AP slot of Odin, or
-  `heimdall flash --RECOVERY recovery.img` (heimdall 2.x).
+### Дисклеймер
+Неофициальная сборка, устанавливаете на свой риск.
 
 ---
 
-# OrangeFox R12.0 для Galaxy Tab A7 10.4 LTE (SM-T505, gta4l)
+## English
 
-Сборка OrangeFox для ROM на Android 11 (LineageOS 18.1, PixelExperience 11) на прошивке
-Android 12 (A12, anti-rollback).
+OrangeFox R12.0 for the Galaxy Tab A7 10.4 LTE (**SM-T505, gta4l**) on the Android 12 firmware (A12, anti-rollback). Made for installing and servicing the Android 11 ROMs: [LineageOS 18.1 and PixelExperience Plus](https://github.com/dolbaras/gta4l-gta4lwifi-roms).
 
-Главное отличие от R11.3: заход в рекавери больше не портит метки `/data`, из-за которых
-в Android 11 ломались Bluetooth и профили ART.
+### Download
+The **[Releases](../../releases)** tab: image, Odin archive, recovery-flashable zip, md5. History of changes: [CHANGELOG.md](CHANGELOG.md).
 
-Исправления в дереве для новой версии OrangeFox:
-- `adb reboot` из рекавери загружает систему, а не снова рекавери.
-- Нет задержки на касания: виброотклик выключен, вибромотора у планшета нет.
-- Расшифровка: добавлен VINTF-манифест (иначе keystore2 падает) и зависимости вендорных
-  библиотек.
-- Удалены нерабочие blob'ы HAL батареи Samsung.
+### Changes against OrangeFox R11.3
+- **Android 11 keeps working after a recovery visit.** R11.3 relabelled the user directories on `/data` by the Android 12 rules, after which Bluetooth and ART profiles broke on Android 11. The recovery now only installs the encryption keys and leaves the directories to the installed system.
+- `adb reboot` from recovery boots the system instead of recovery again.
+- No touch delay: haptics are off, the tablet has no vibration motor.
+- `/data` decryption works with the A12 firmware keys.
+
+### Install
+- **From recovery:** install `OrangeFox-*.zip`, or flash the image to the Recovery partition.
+- **From Download mode:** `OrangeFox-*.img.tar` in the AP slot of Odin, or `heimdall flash --RECOVERY recovery.img` (heimdall 2.x).
+
+Reboot to the system: **Reboot → System** in the menu, or `adb reboot`.
+
+### Known issues
+- `adb shell reboot` (the command inside a shell) returns to recovery: this is how the Samsung bootloader treats the reboot reason `shell`. Use the menu or `adb reboot`.
+- USB and adb come up about 25 seconds after start, the time decryption and the OrangeFox startup scripts take.
+- SM-T500 (gta4lwifi) has not been tested.
+
+### Build
+OrangeFox `fox_12.1` manifest (bootable/recovery `cbcc4f71`, vendor/recovery `cea00ca`):
+```bash
+cp -r device_samsung_gta4l <fox>/device/samsung/gta4l
+git -C <fox>/system/vold apply patches/system_vold.patch
+git -C <fox>/packages/modules/adb apply patches/packages_modules_adb.patch
+cd <fox> && source build/envsetup.sh && lunch twrp_gta4l-eng && mka recoveryimage
+```
+
+### Feedback
+[Issues](../../issues): model, stock firmware version, what fails, the log from `/sdcard/Fox/logs`.
+
+### Disclaimer
+Unofficial build, use at your own risk.
