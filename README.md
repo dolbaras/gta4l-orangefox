@@ -32,8 +32,8 @@ OrangeFox R12.0 для Galaxy Tab A7 10.4 LTE (**SM-T505, gta4l**) на прош
 Манифест OrangeFox `fox_12.1` (bootable/recovery `cbcc4f71`, vendor/recovery `cea00ca`):
 ```bash
 cp -r device_samsung_gta4l <fox>/device/samsung/gta4l
-git -C <fox>/system/vold apply patches/system_vold.patch
-git -C <fox>/packages/modules/adb apply patches/packages_modules_adb.patch
+git -C <fox>/system/vold apply "$PWD/patches/system_vold.patch"
+git -C <fox>/packages/modules/adb apply "$PWD/patches/packages_modules_adb.patch"
 cd <fox> && source build/envsetup.sh && lunch twrp_gta4l-eng && mka recoveryimage
 ```
 
@@ -73,8 +73,8 @@ Reboot to the system: **Reboot → System** in the menu, or `adb reboot`.
 OrangeFox `fox_12.1` manifest (bootable/recovery `cbcc4f71`, vendor/recovery `cea00ca`):
 ```bash
 cp -r device_samsung_gta4l <fox>/device/samsung/gta4l
-git -C <fox>/system/vold apply patches/system_vold.patch
-git -C <fox>/packages/modules/adb apply patches/packages_modules_adb.patch
+git -C <fox>/system/vold apply "$PWD/patches/system_vold.patch"
+git -C <fox>/packages/modules/adb apply "$PWD/patches/packages_modules_adb.patch"
 cd <fox> && source build/envsetup.sh && lunch twrp_gta4l-eng && mka recoveryimage
 ```
 
