@@ -1,0 +1,28 @@
+diff --git a/FsCrypt.cpp b/FsCrypt.cpp
+index 7505e56..9ef7e3e 100644
+--- a/FsCrypt.cpp
++++ b/FsCrypt.cpp
+@@ -913,16 +913,14 @@ bool fscrypt_prepare_user_storage(const std::string& volume_uuid, userid_t user_
+             if (!EnsurePolicy(ce_policy, user_ce_path)) return false;
+         }
+ 
+-        if (volume_uuid.empty()) {
+-            // Now that credentials have been installed, we can run restorecon
+-            // over these paths
+-            // NOTE: these paths need to be kept in sync with libselinux
+-            android::vold::RestoreconRecursive(system_ce_path);
+-            android::vold::RestoreconRecursive(vendor_ce_path);
+-            android::vold::RestoreconRecursive(misc_ce_path);
+-        }
++        // No restorecon here: in recovery the labels come from the recovery's own
++        // file_contexts, not from the Android release installed on /data.
+     }
+-    if (!prepare_subdirs("prepare", volume_uuid, user_id, flags)) return false;
++    // In recovery only the keys are needed. vold_prepare_subdirs labels the per-user
++    // directories by this (Android 12) policy, e.g. with per-user MLS categories on
++    // /data/user_de/<id> and user_profile_root_file on /data/misc/profiles/cur/<id>;
++    // an installed Android 11 does not expect those labels and loses access to them.
++    // Preparing the user's storage is left to the installed system's vold.
+ 
+     return true;
+ }

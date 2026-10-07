@@ -1,0 +1,17 @@
+diff --git a/daemon/services.cpp b/daemon/services.cpp
+index a9d1fe8..acfbf18 100644
+--- a/daemon/services.cpp
++++ b/daemon/services.cpp
+@@ -143,7 +143,11 @@ static void spin_service(unique_fd fd) {
+ 
+ [[maybe_unused]] static unique_fd reboot_device(const std::string& name) {
+ #if defined(__ANDROID_RECOVERY__)
+-    if (!__android_log_is_debuggable()) {
++    // Reboot through init with the requested target, as the non-debuggable recovery does.
++    // /system/bin/reboot without arguments reports the reason "shell", and the Samsung
++    // bootloader keeps booting recovery after a reboot from recovery with a reason it does
++    // not know, so a plain "adb reboot" never left recovery.
++    {
+         auto reboot_service = [name](unique_fd fd) {
+             std::string reboot_string = android::base::StringPrintf("reboot,%s", name.c_str());
+             if (!android::base::SetProperty(ANDROID_RB_PROPERTY, reboot_string)) {
